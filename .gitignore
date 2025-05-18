@@ -1,0 +1,49 @@
+# Python bytecode and cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+.env/
+.venv/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Package and build files
+dist/
+build/
+*.egg-info/
+pip-wheel-metadata/
+
+# Testing and coverage
+.coverage
+coverage.xml
+*.cover
+*.log
+pytest_cache/
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+.env.local
+*.db
+CodeEnumerator.py
+code_summary.md
+additional.txt
+header.txt
+footer.txt
+test_output.txt
+*.log
