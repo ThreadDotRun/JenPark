@@ -41,9 +41,9 @@ pytest_cache/
 .env.local
 *.db
 CodeEnumerator.py
-code_summary.md
 additional.txt
 header.txt
 footer.txt
 test_output.txt
 *.log
+code_summary*
