@@ -1,7 +1,7 @@
 # RV Park CRM/Maintenance System
 
 ## Overview
-The RV Park CRM/ERP System is a Python-based application designed to manage operations for an RV park, including customer management, site reservations, invoicing, payment tracking, and maintenance/facility management. The system uses SQLite for data storage and is organized into core database initialization components and modular packages (`crm/` and `maintenance/`). Comprehensive unit tests ensure reliability and correctness of the system.
+The RV Park CRM/Maintenance System is a Python-based application designed to manage operations for an RV park, including customer management, site reservations, invoicing, payment tracking, and maintenance/facility management. The system uses SQLite for data storage and is organized into core database initialization components and modular packages (`crm/` and `maintenance/`). Comprehensive unit tests ensure reliability and correctness of the system.
 
 ### Project Structure
 ```
