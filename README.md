@@ -32,7 +32,7 @@ The RV Park CRM/ERP System is a Python-based application designed to manage oper
 ## Requirements
 - Python 3.6 or higher
 - SQLite3 (included with Python standard library)
-- No external dependencies required
+- pathspec==0.12.1
 
 ## Setup Instructions
 1. **Clone or Download the Repository**:
