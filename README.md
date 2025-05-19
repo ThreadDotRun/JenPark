@@ -193,6 +193,109 @@ result = crm.create_reservation(1, 1, "2025-06-01", "2025-06-05")
 print(result)  # {'status': 'success', 'reservation_id': 1, 'invoice_id': 1}
 ```
 
+## Database tables init raw SQL
+### RV Park CRM/ERP Database Schema
+
+This document describes the current database schema for the RV Park CRM/ERP system, as implemented in the SQLite database. The schema consists of five tables: `customers`, `rv_sites`, `reservations`, `invoices`, and `payments`. Each table is detailed below, including column names, data types, constraints, and relationships.
+
+## Table: customers
+Stores information about customers of the RV park.
+
+| Column Name   | Data Type | Constraints                                      | Description                              |
+|---------------|-----------|--------------------------------------------------|------------------------------------------|
+| customer_id   | INTEGER   | PRIMARY KEY AUTOINCREMENT                        | Unique identifier for the customer       |
+| first_name    | TEXT      | NOT NULL                                         | Customer's first name                   |
+| last_name     | TEXT      | NOT NULL                                         | Customer's last name                    |
+| email         | TEXT      | UNIQUE                                           | Customer's email address (optional)      |
+| phone         | TEXT      |                                                  | Customer's phone number (optional)       |
+| address       | TEXT      |                                                  | Customer's address (optional)            |
+| created_at    | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP                        | Timestamp of record creation             |
+
+**Relationships**:
+- Referenced by `reservations.customer_id` (foreign key).
+- Referenced by `invoices.customer_id` (foreign key).
+- Referenced by `payments.customer_id` (foreign key).
+
+## Table: rv_sites
+Stores information about RV sites available at the park.
+
+| Column Name   | Data Type | Constraints                                      | Description                              |
+|---------------|-----------|--------------------------------------------------|------------------------------------------|
+| site_id       | INTEGER   | PRIMARY KEY AUTOINCREMENT                        | Unique identifier for the RV site        |
+| site_number   | TEXT      | NOT NULL UNIQUE                                  | Unique site number (e.g., "Site1")       |
+| site_type     | TEXT      | NOT NULL                                         | Type of site (e.g., "Full Hookup")       |
+| daily_rate    | REAL      | NOT NULL                                         | Daily rental rate for the site           |
+| is_active     | INTEGER   | NOT NULL DEFAULT 1                               | Site availability (1 = active, 0 = inactive) |
+| description   | TEXT      |                                                  | Optional description of the site         |
+
+**Relationships**:
+- Referenced by `reservations.site_id` (foreign key).
+
+## Table: reservations
+Stores reservation details for RV sites.
+
+| Column Name     | Data Type | Constraints                                      | Description                              |
+|-----------------|-----------|--------------------------------------------------|------------------------------------------|
+| reservation_id  | INTEGER   | PRIMARY KEY AUTOINCREMENT                        | Unique identifier for the reservation    |
+| customer_id     | INTEGER   | NOT NULL FOREIGN KEY REFERENCES customers(customer_id) | ID of the customer making the reservation |
+| site_id         | INTEGER   | NOT NULL FOREIGN KEY REFERENCES rv_sites(site_id) | ID of the reserved RV site              |
+| check_in_date   | DATE      | NOT NULL                                         | Date of check-in                        |
+| check_out_date  | DATE      | NOT NULL                                         | Date of check-out                       |
+| status          | TEXT      | NOT NULL                                         | Reservation status (e.g., "Confirmed")   |
+| total_amount    | REAL      | NOT NULL                                         | Total cost of the reservation            |
+| created_at      | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP                        | Timestamp of record creation             |
+
+**Constraints**:
+- `CHECK (check_out_date > check_in_date)`: Ensures check-out date is after check-in date.
+
+**Relationships**:
+- References `customers.customer_id` (foreign key).
+- References `rv_sites.site_id` (foreign key).
+- Referenced by `invoices.reservation_id` (foreign key).
+
+## Table: invoices
+Stores invoice details for reservations.
+
+| Column Name     | Data Type | Constraints                                      | Description                              |
+|-----------------|-----------|--------------------------------------------------|------------------------------------------|
+| invoice_id      | INTEGER   | PRIMARY KEY AUTOINCREMENT                        | Unique identifier for the invoice        |
+| reservation_id  | INTEGER   | NOT NULL FOREIGN KEY REFERENCES reservations(reservation_id) | ID of the associated reservation        |
+| customer_id     | INTEGER   | NOT NULL FOREIGN KEY REFERENCES customers(customer_id) | ID of the customer for the invoice      |
+| issue_date      | DATE      | NOT NULL                                         | Date the invoice was issued             |
+| due_date        | DATE      | NOT NULL                                         | Date the invoice is due                 |
+| total_amount    | REAL      | NOT NULL                                         | Total amount of the invoice             |
+| status          | TEXT      | NOT NULL                                         | Invoice status (e.g., "Pending", "Paid") |
+| created_at      | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP                        | Timestamp of record creation             |
+
+**Relationships**:
+- References `reservations.reservation_id` (foreign key).
+- References `customers.customer_id` (foreign key).
+- Referenced by `payments.invoice_id` (foreign key).
+
+## Table: payments
+Stores payment details for invoices.
+
+| Column Name     | Data Type | Constraints                                      | Description                              |
+|-----------------|-----------|--------------------------------------------------|------------------------------------------|
+| payment_id      | INTEGER   | PRIMARY KEY AUTOINCREMENT                        | Unique identifier for the payment        |
+| invoice_id      | INTEGER   | NOT NULL FOREIGN KEY REFERENCES invoices(invoice_id) | ID of the associated invoice            |
+| customer_id     | INTEGER   | NOT NULL FOREIGN KEY REFERENCES customers(customer_id) | ID of the customer making the payment   |
+| payment_date    | DATE      | NOT NULL                                         | Date of the payment                     |
+| amount          | REAL      | NOT NULL                                         | Payment amount                          |
+| payment_method  | TEXT      | NOT NULL                                         | Payment method (e.g., "Credit Card")     |
+| created_at      | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP                        | Timestamp of record creation             |
+
+**Relationships**:
+- References `invoices.invoice_id` (foreign key).
+- References `customers.customer_id` (foreign key).
+
+## Notes
+- The schema is designed for SQLite and uses `INTEGER` for primary keys with `AUTOINCREMENT` to ensure unique IDs.
+- Foreign keys enforce referential integrity between tables (e.g., a reservation must reference a valid customer and RV site).
+- The `created_at` timestamp in each table provides an audit trail for record creation.
+- The `reservations` table includes a `CHECK` constraint to ensure logical date ranges.
+- The `rv_sites.is_active` field allows for soft deletion of sites (marking them inactive without removing records).
+- The schema matches the implementation in `InitializeSQLiteDatabase.py` and `test_crm_components.py` as of the current project state.
 ## Notes
 - **Database**: The production database is `park.db`, while tests use `test_park.db`. Ensure `test_park.db` is deleted before running tests if a previous run was interrupted.
 - **Error Logging**: Errors are logged to `crm/crm_errors.log`. Check this file for debugging issues.
